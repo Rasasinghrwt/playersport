@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BGMI Tournaments | Free Hosting Starter</title>
+  <meta name="description" content="Free BGMI tournament website: registrations, schedule, prizes, rules, leaderboard."/>
+  <meta property="og:title" content="BGMI Tournaments"/>
+  <meta property="og:description" content="Join BGMI custom rooms, scrims, and paid/free cups."/>
+  <meta property="og:type" content="website"/>
+  <link rel="icon" href="https://fav.farm/🔥"/>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Icons -->
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet" />
+  <!-- PapaParse for Google Sheets CSV → table -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    /* Smooth card hover */
+    .card{transition:transform .2s ease, box-shadow .2s ease}
+    .card:hover{transform:translateY(-4px); box-shadow:0 10px 25px rgba(0,0,0,.08)}
+    .glass{backdrop-filter:saturate(180%) blur(10px); background:rgba(255,255,255,.7)}
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-50 glass border-b border-white/60">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🎮</span>
+        <a href="#" class="font-black tracking-tight text-slate-900">BGMI Arena</a>
+      </div>
+      <nav class="ml-auto hidden md:flex gap-6 text-sm">
+        <a href="#tournaments" class="hover:underline">Tournaments</a>
+        <a href="#leaderboard" class="hover:underline">Leaderboard</a>
+        <a href="#rules" class="hover:underline">Rules</a>
+        <a href="#contact" class="hover:underline">Contact</a>
+      </nav>
+      <a id="regTop" href="#register" class="ml-auto md:ml-0 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-700">
+        <i class="lucide lucide-sword"></i>
+        Register
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-100 via-white to-emerald-100"></div>
+    <div class="max-w-6xl mx-auto px-4 py-14 relative">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-3xl md:text-5xl font-black leading-tight">BGMI Tournaments, Scrims & Customs</h1>
+          <p class="mt-4 text-slate-700">Free + Paid cups • Live points table • Instant room id/pass on WhatsApp/Discord • UPI prizes</p>
+          <div class="mt-6 flex gap-3">
+            <a href="#tournaments" class="rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-semibold">Explore Tournaments</a>
+            <a id="heroReg" href="#register" class="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold">Quick Register</a>
+          </div>
+          <!-- Countdown (edit date in data-deadline) -->
+          <div class="mt-8 p-4 rounded-2xl bg-white/70 border border-slate-200 w-fit">
+            <div class="text-xs uppercase tracking-wider text-slate-500">Next Cup Starts In</div>
+            <div id="countdown" class="text-2xl font-black mt-1">--:--:--</div>
+          </div>
+        </div>
+        <div class="relative">
+          <img alt="BGMI banner" class="w-full rounded-3xl shadow-2xl" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1400&auto=format&fit=crop"/>
+          <div class="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow p-4 text-xs">
+            <div class="font-bold">Room ID/Pass</div>
+            <div class="text-slate-600">Sent 10 min before match</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tournaments -->
+  <section id="tournaments" class="max-w-6xl mx-auto px-4 py-12">
+    <div class="flex items-end justify-between gap-4">
+      <h2 class="text-2xl md:text-3xl font-black">Upcoming Tournaments</h2>
+      <div class="text-sm text-slate-600">Timezone: IST (UTC+5:30)</div>
+    </div>
+    <div id="tourList" class="grid md:grid-cols-3 gap-6 mt-6"></div>
+  </section>
+
+  <!-- Leaderboard -->
+  <section id="leaderboard" class="bg-white border-t border-b">
+    <div class="max-w-6xl mx-auto px-4 py-12">
+      <h2 class="text-2xl md:text-3xl font-black">Leaderboard</h2>
+      <p class="text-slate-600 mt-1 text-sm">Connect a published Google Sheet (CSV) to auto-update placings.</p>
+      <div class="overflow-auto rounded-2xl border mt-4">
+        <table id="lbTable" class="min-w-full text-sm">
+          <thead class="bg-slate-100 text-slate-700">
+            <tr>
+              <th class="text-left p-3">#</th>
+              <th class="text-left p-3">Team</th>
+              <th class="text-left p-3">Kills</th>
+              <th class="text-left p-3">Placement Pts</th>
+              <th class="text-left p-3">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y" id="lbBody">
+            <tr><td class="p-3" colspan="5">Add your Google Sheet CSV URL in <code>LB_CSV_URL</code> below.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-xs text-slate-500 mt-3">Tip: Google Sheets → File → Share → Publish to web → Link → CSV → copy URL.</div>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section id="rules" class="max-w-6xl mx-auto px-4 py-12">
+    <h2 class="text-2xl md:text-3xl font-black">Rules & Fair Play</h2>
+    <ul class="list-disc pl-6 mt-4 space-y-2 text-slate-700">
+      <li>Emulators & hacks strictly banned; device screen-record on request.</li>
+      <li>Room ID/Pass shared 10 minutes before match; late entries not allowed.</li>
+      <li>Point system: Finish = 1pt/kill, WWCD = +10, 2nd = +6, 3rd = +5, 4th = +4, 5th = +3.</li>
+      <li>Disputes: Submit proof within 15 minutes post-match on WhatsApp/Discord.</li>
+      <li>Prize payout via UPI within 24 hours to the captain only.</li>
+    </ul>
+  </section>
+
+  <!-- Contact / Register -->
+  <section id="contact" class="bg-slate-900 text-white">
+    <div class="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Contact</h2>
+        <p class="mt-2 text-slate-300">WhatsApp/Call: <a class="underline" href="tel:+91XXXXXXXXXX">+91 XXXXX-XXXXX</a></p>
+        <p class="mt-1 text-slate-300">Discord: <a class="underline" href="#">Join Server</a></p>
+        <p class="mt-1 text-slate-300">Email: <a class="underline" href="mailto:you@example.com">you@example.com</a></p>
+      </div>
+      <div id="register" class="bg-white rounded-3xl p-5 text-slate-900">
+        <h3 class="text-xl font-black">Quick Registration</h3>
+        <p class="text-slate-600 text-sm mt-1">We use Google Form. Click to open and submit your team details.</p>
+        <a id="regBtn" href="https://forms.gle/YOUR_GOOGLE_FORM_ID" target="_blank" class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 text-white px-4 py-3 text-sm font-semibold hover:bg-indigo-700">
+          <i class="lucide lucide-form-input"></i>
+          Open Registration Form
+        </a>
+        <div class="text-xs text-slate-500 mt-3">Replace the above link with your Google Form URL.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-xs text-slate-500 py-6">
+    © <span id="yr"></span> BGMI Arena • Made with ❤ • <a href="#" class="underline">Instagram</a> • <a href="#" class="underline">YouTube</a>
+  </footer>
+
+  <script>
+    // ======== QUICK CONFIG (EDIT THESE) ========
+    const DEADLINE = '2025-09-01T18:30:00+05:30'; // Next cup start (IST)
+    const LB_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_CSV_URL/pub?output=csv';
+    const TOURNAMENTS = [
+      {
+        title: 'BGMI Solo Cup', fee: 'Free', date: '2025-08-27 8:00 PM', slots: 100,
+        map: 'Erangel', mode: 'TPP', reg: 'https://forms.gle/YOUR_GOOGLE_FORM_ID', prize: '₹500 UPI'
+      },
+      {
+        title: 'Weekend Squad Scrims', fee: '₹40/team', date: '2025-08-30 7:30 PM', slots: 25,
+        map: 'Miramar + Sanhok', mode: 'TPP', reg: 'https://forms.gle/YOUR_GOOGLE_FORM_ID', prize: 'Split 70/30'
+      },
+      {
+        title: 'Pro Lobby — Duo', fee: '₹20/player', date: '2025-09-02 9:00 PM', slots: 50,
+        map: 'Erangel', mode: 'FPP', reg: 'https://forms.gle/YOUR_GOOGLE_FORM_ID', prize: '₹1,000 UPI'
+      }
+    ];
+    // ===========================================
+
+    // Year in footer
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // Countdown timer
+    const countdownEl = document.getElementById('countdown');
+    function tick(){
+      const end = new Date(DEADLINE).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, end - now);
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      countdownEl.textContent = `${d}d ${h}h ${m}m ${s}s`;
+    }
+    tick(); setInterval(tick, 1000);
+
+    // Render tournaments
+    const list = document.getElementById('tourList');
+    list.innerHTML = TOURNAMENTS.map(t => `
+      <article class="card rounded-3xl bg-white border p-5">
+        <div class="flex items-start justify-between gap-3">
+          <h3 class="text-lg font-black">${t.title}</h3>
+          <span class="text-xs rounded-full px-2 py-1 bg-slate-100">${t.fee}</span>
+        </div>
+        <div class="mt-2 text-sm text-slate-700">${t.date} • ${t.map} • ${t.mode}</div>
+        <div class="mt-2 text-xs text-slate-500">Slots: ${t.slots}</div>
+        <div class="mt-4 flex items-center gap-3">
+          <a class="rounded-xl bg-slate-900 text-white text-sm px-3 py-2" href="${t.reg}" target="_blank">Register</a>
+          <span class="text-xs text-slate-600">Prize: ${t.prize}</span>
+        </div>
+      </article>
+    `).join('');
+
+    // Load leaderboard from Google Sheet CSV
+    function loadLeaderboard(){
+      if(!LB_CSV_URL.includes('YOUR_PUBLISHED_CSV_URL')) return; // safety: show placeholder until user adds URL
+      Papa.parse(LB_CSV_URL, {
+        download: true,
+        header: true,
+        complete: function(results){
+          const rows = results.data.filter(r=>r.Team && r.Total);
+          const body = document.getElementById('lbBody');
+          body.innerHTML = rows.map((r, i)=>`
+            <tr>
+              <td class="p-3">${i+1}</td>
+              <td class="p-3 font-medium">${r.Team}</td>
+              <td class="p-3">${r.Kills ?? r.Kill ?? 0}</td>
+              <td class="p-3">${r.Placement ?? r['Placement Pts'] ?? 0}</td>
+              <td class="p-3 font-bold">${r.Total}</td>
+            </tr>
+          `).join('');
+        }
+      });
+    }
+    // Uncomment to auto-load when you add your CSV URL
+    // loadLeaderboard();
+  </script>
+
+  <!-- HOW TO DEPLOY (remove this comment block after reading)
+  1) Make a Google Form for registration. Copy the Form link and replace all instances of https://forms.gle/YOUR_GOOGLE_FORM_ID above.
+  2) Make a Google Sheet for leaderboard. File → Share → Publish to web → CSV → copy URL and replace LB_CSV_URL. Then uncomment loadLeaderboard();
+  3) Host free on GitHub Pages:
+     • Create GitHub account → New repository → name: bgmi-arena (public)
+     • Upload this index.html → Settings → Pages → Source: Deploy from a branch → main / root → Save
+     • Your site opens at https://<username>.github.io/bgmi-arena
+  4) Optional free features:
+     • Add WhatsApp API link: https://wa.me/91XXXXXXXXXX?text=BGMI%20Register
+     • Add Google Calendar event link for each tournament.
+     • Use UPI QR image in Contact block for paid cups.
+  5) Custom domain (optional): buy cheap .in / .fun, or use free subdomain from Netlify if you deploy there.
+  -->
+</body>
+</html>
